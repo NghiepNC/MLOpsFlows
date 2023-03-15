@@ -2,7 +2,7 @@
 # -*-coding:utf-8 -*-
 '''
 @File    :   generate_fake_data.py
-@Time    :   2023/03/15 13:06:40
+@Time    :   2023/03/15 19:44:08
 @Author  :   Duy Nam
 @Version :   0.1
 @Contact :   nam.nd.00@gmail.com
