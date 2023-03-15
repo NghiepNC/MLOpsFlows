@@ -9,19 +9,18 @@
 @Desc    :   MLOps Flows
 '''
 
-from faker import Faker
-import pandas as pd
-from collections import OrderedDict
-from datetime import datetime
 import os
 import argparse
+from typing import Any, List
+from uuid import uuid4
+from datetime import datetime
+from collections import OrderedDict
 import sys
 import csv
-
+import pandas as pd
+from faker import Faker
 from data_pipeline.utils.logger import Logging
 from data_pipeline.fake.goodreads import config
-from typing import Any
-from uuid import uuid4
 
 
 class GoodreadsFake:
@@ -32,8 +31,8 @@ class GoodreadsFake:
 
         Args:
             base_directory (str, optional): The path to base directory. Defaults to None.
-        """ 
-        self.logging = Logging().LOG
+        """
+        self.logging = Logging().get_logger()
         self._faker = Faker(['it_IT', 'en_US', 'hi_IN', 'ja_JP'])
         self._fake_books = [
             "Vacation People","Enter the Aardvark",
@@ -70,17 +69,17 @@ class GoodreadsFake:
             "A Wizard of Earthsea",
             "Dragons & Magic (Dragon's Den Casino #1)"
         ]
-        self._user_data_list = list()
-        self._review_data_list = list()
-        self._author_data_list = list()
-        self._book_data_list = list()
+        self._user_data_list: List[Any] = []
+        self._review_data_list: List[Any] = []
+        self._author_data_list: List[Any] = []
+        self._book_data_list: List[Any] = []
         self._base_directory = base_directory if base_directory != "" \
             else config.GOODREADS_BASE_DIRECTORY
-        
+
         if not os.path.exists(self._base_directory):
             os.makedirs(self._base_directory)
             self.logging.info("Created %s." % (self._base_directory))
-        
+
     def generate(self, num_records: int = 0):
         """Generate the fake data follow the given num_records
 
@@ -98,7 +97,7 @@ class GoodreadsFake:
             self._user_data_list.append(self._parse_user_data(review_obj))
             self._author_data_list.append(self._parse_author_data(review_obj))
             self._book_data_list.append(self._parse_book_data(review_obj))
-        
+
         for module_name, module_data in zip(["reviews", "user", "author", "book"],
                                             [self._review_data_list, self._user_data_list,\
                                              self._author_data_list, self._book_data_list]):
@@ -108,7 +107,7 @@ class GoodreadsFake:
             self._clear_modules()
 
     def _generate_fake_review_data(self):
-        """Generate fake review data 
+        """Generate fake review data
         """
         return {
             #Fake review
@@ -139,7 +138,8 @@ class GoodreadsFake:
 
             # Fake book
             "title": self._fake_books[ self._faker.random_int(0, len(self._fake_books)-1) ],
-            "title_without_series": self._fake_books[ self._faker.random_int(0, len(self._fake_books)-1) ],
+            "title_without_series": self._fake_books[ \
+                self._faker.random_int(0, len(self._fake_books)-1) ],
             "image_url": self._faker.image_url(),
             "book_url": self._faker.image_url(),
             "num_pages": self._faker.random_int(10, 1000),
@@ -170,8 +170,8 @@ class GoodreadsFake:
             review_obj (Any): the review object. Defaults to None.
         """
         if review_obj is None:
-            self.logging.error("Review object is None.")
-            sys.exit(1)
+            self.logging.error("Review object %s is None." % review_obj)
+            return OrderedDict()
 
         return OrderedDict(
             {
@@ -200,7 +200,8 @@ class GoodreadsFake:
             review_obj (Any, optional): the review objects. Defaults to None.
         """
         if review_obj is None:
-            self.logging.error("Review object is None.")
+            self.logging.error("Review object %s is None." % review_obj)
+            return OrderedDict()
 
         return OrderedDict(
             {
@@ -224,8 +225,8 @@ class GoodreadsFake:
             review_obj (Any, optional): the review object. Defaults to None.
         """
         if review_obj is None:
-            self.logging.error("Review object is None.")
-            sys.exit(1)
+            self.logging.error("Review object %s is None." % review_obj)
+            return OrderedDict()
 
         return OrderedDict(
             {
@@ -247,8 +248,8 @@ class GoodreadsFake:
             review_obj (Any, optional): the review object. Defaults to None.
         """
         if review_obj is None:
-            self.logging.error("Review object is None.")
-            sys.exit(1)
+            self.logging.error("Review object %s is None." % review_obj)
+            return OrderedDict()
 
         return OrderedDict(
             {
@@ -272,7 +273,7 @@ class GoodreadsFake:
                 "record_create_timestamp": review_obj['record_create_timestamp']
             }.items()
         )
-    
+
     def _write_to_disk(self, module_name: str = "", module_data: Any = None):
         """Write the module data to disk
 
@@ -283,7 +284,7 @@ class GoodreadsFake:
         if not module_name:
             self.logging.warning("The %s is empty. Create uuid module name." % module_name)
             module_name = uuid4().hex
-        
+
         if module_data is None:
             self.logging.error("The module data is %s" % str(module_data))
             sys.exit(1)
@@ -293,45 +294,46 @@ class GoodreadsFake:
         output_file_path = os.path.join(self._base_directory, f"{module_name}-{str(now)}.csv")
         if os.path.exists(output_file_path):
             self.logging.warning("%s existed. Overwrite it." % output_file_path)
-        
+
         write_mode, header = ('a', False) \
             if os.path.isfile(output_file_path) else ('w', True)
         self.logging.info("Using the write mode `%s` and `%s` to write module data to disk." \
                           % (write_mode, header))
-        
+
         if len(module_data) > 0:
             pd \
                 .DataFrame(module_data) \
                 .to_csv(path_or_buf=output_file_path, sep=",", index=False, mode=write_mode, \
                         header=header, quoting=csv.QUOTE_MINIMAL, encoding='utf-8')
-            
+
             self.logging.info("Write given module data to %s" % output_file_path)
 
-    def _clean_text(cls, text: str = ""):
+    def _clean_text(self, text: str = ""):
         """Clean text.
 
         Args:
             text (str, optional): the input text to clean. Defaults to "".
         """
         if text == "":
-            cls.logging.error("The empty string.")
+            self.logging.error("The empty string.")
             sys.exit(1)
 
         return " ".join((text.replace("\n", "")).split())
 
     def _clear_modules(self):
-        self._user_data_list = list()
-        self._review_data_list = list()
-        self._author_data_list = list()
-        self._book_data_list = list()
+        self._user_data_list = []
+        self._review_data_list = []
+        self._author_data_list = []
+        self._book_data_list = []
+
+    def __str__(self) -> str:
+        return "GoodreadsFake Instance"
 
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser(
         description="A fake data generator for Goodreads reivews."
     )
-
-    parser._action_groups.pop()
     required = parser.add_argument_group('required arguments')
     required.add_argument('-n', '--num_records', type=int, metavar='', required=True, \
                           help="Number of records to generate.")
