@@ -1,1 +1,4 @@
-fake_data/*
+# ignore data directory
+data/fake/
+data/source/
+logs/
