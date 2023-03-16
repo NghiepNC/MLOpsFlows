@@ -8,5 +8,5 @@
 @Contact :   nam.nd.00@gmail.com
 @Desc    :   MLOps Flows
 '''
-from data_pipeline.src import fake
-from data_pipeline.src import utils
+from mlopsflows.data_pipeline.src import fake
+from mlopsflows.data_pipeline.src import utils

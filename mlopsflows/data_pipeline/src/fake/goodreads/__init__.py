@@ -9,4 +9,4 @@
 @Desc    :   MLOps Flows
 '''
 
-from data_pipeline.src.fake.goodreads import generate_fake_data
+from mlopsflows.data_pipeline.src.fake.goodreads import generate_fake_data
