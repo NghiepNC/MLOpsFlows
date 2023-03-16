@@ -13,8 +13,9 @@ import logging
 import sys
 from typing import Any
 import os
+from pathlib import Path
 
-BASE_DIR = os.path.dirname(__file__)
+BASE_DIR = os.path.dirname(Path(__file__).parent.parent)
 LOG_DIR = os.path.join(BASE_DIR, "logs")
 
 if not os.path.exists(LOG_DIR):
