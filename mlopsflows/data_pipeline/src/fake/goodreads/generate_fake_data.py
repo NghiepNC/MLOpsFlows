@@ -19,8 +19,8 @@ import sys
 import csv
 import pandas as pd
 from faker import Faker
-from data_pipeline.src.utils.logger import Logging
-from data_pipeline.src.fake.goodreads import config
+from mlopsflows.data_pipeline.src.utils.logger import Logging
+from mlopsflows.data_pipeline.src.fake.goodreads import config
 
 
 class GoodreadsFake:

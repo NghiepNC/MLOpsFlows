@@ -8,4 +8,4 @@
 @Contact :   nam.nd.00@gmail.com
 @Desc    :   MLOps Flows
 '''
-from data_pipeline.src.fake import goodreads
+from mlopsflows.data_pipeline.src.fake import goodreads
